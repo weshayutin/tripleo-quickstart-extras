@@ -14,6 +14,8 @@ undercloud_hostname: localhost
 hostname_correction: false
 
 package_installs: true
+# The undercloud_package_requirements variable is passed as a space delineated string
+undercloud_package_requirements: "python-tripleoclient "
 
 ovb_setup_connectivity: false
 ovb_undercloud_connectivity_log: "{{ working_dir }}/ovb_undercloud_connectivity.log"

@@ -99,7 +99,7 @@
   set_fact:
       cloud_name_args: >-
           -e {{ working_dir }}/cloud-names.yaml
-  when: release not in ['mitaka', 'liberty']
+  when: release not in ['mitaka', 'liberty', 'kilo']
 
 - name: set ssl_args fact for master/newton
   set_fact:
@@ -118,7 +118,7 @@
       -e {{ working_dir }}/inject-trust-anchor.yaml
   when:
     - ssl_overcloud|bool
-    - release in ['mitaka', 'liberty']
+    - release in ['mitaka', 'liberty', 'kilo']
 
 - name: set novajoin/TLS everywhere fact
   set_fact:
@@ -128,12 +128,12 @@
           -e {{ overcloud_templates_path }}/environments/tls-everywhere-endpoints-dns.yaml
   when:
     - enable_tls_everywhere|bool
-    - release not in ['mitaka', 'liberty', 'newton']
+    - release not in ['mitaka', 'liberty', 'newton', 'kilo']
 
 - name: set validation_args fact for mitaka/liberty
   set_fact:
     validation_args: "--validation-errors-fatal --validation-warnings-fatal"
-  when: release in ['mitaka', 'liberty']
+  when: release in ['mitaka', 'liberty', 'kilo']
 
 - name: disable L3 HA
   set_fact:
@@ -148,7 +148,7 @@
   set_fact:
     workers_args: >-
       -e {{ overcloud_templates_path }}/environments/low-memory-usage.yaml
-  when: release not in ['mitaka', 'liberty']
+  when: release not in ['mitaka', 'liberty', 'kilo']
 
 - name: Use KVM for Red Hat distro
   set_fact: libvirt_args="--libvirt-type kvm"

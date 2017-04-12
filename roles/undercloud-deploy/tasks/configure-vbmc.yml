@@ -1,7 +1,7 @@
 ---
 
 - name: Install VirtualBMC package
-  when: release not in ['liberty', 'mitaka', 'newton']
+  when: release not in ['kilo', 'liberty', 'mitaka', 'newton']
   package:
     name: "python2-virtualbmc"
     state: present
@@ -21,7 +21,7 @@
     non_root_user_uid: "{{ non_root_user_uid.stdout }}"
 
 - name: Create the Virtual BMCs
-  when: release not in ['liberty', 'mitaka', 'newton']
+  when: release not in ['kilo', 'liberty', 'mitaka', 'newton']
   command: >
     vbmc add {{item.name}} --port {{item.virtualbmc_port}} --libvirt-uri
     "qemu+ssh://{{ non_root_user }}@{{ networks[0].address }}/session?socket=/run/user/{{ non_root_user_uid }}/libvirt/libvirt-sock&keyfile=/root/.ssh/id_rsa_virt_power&no_verify=1&no_tty=1"
@@ -33,7 +33,7 @@
 # TODO(lucasagomes): The service file should be included in the
 #                    virtualbmc RPM package.
 - name: Create the VirtualBMC systemd service
-  when: release not in ['liberty', 'mitaka', 'newton']
+  when: release not in ['kilo', 'liberty', 'mitaka', 'newton']
   copy:
     mode: 0664
     dest: "/usr/lib/systemd/system/virtualbmc.service"
@@ -53,7 +53,7 @@
   become: true
 
 - name: Start the Virtual BMCs
-  when: release not in ['liberty', 'mitaka', 'newton']
+  when: release not in ['kilo', 'liberty', 'mitaka', 'newton']
   service:
     name: virtualbmc
     state: started

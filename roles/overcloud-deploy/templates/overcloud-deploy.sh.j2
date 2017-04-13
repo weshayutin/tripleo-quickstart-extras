@@ -63,38 +63,13 @@ EOENV
 
 ## * Deploy the overcloud!
 ## ::
-openstack overcloud deploy \
+openstack overcloud deploy --debug \
     --templates {{overcloud_templates_path}} \
     {{ deploy_args }} \
-    ${DEPLOY_ENV_YAML:+-e $DEPLOY_ENV_YAML} "$@" && status_code=0 || status_code=$?
+    ${DEPLOY_ENV_YAML:+-e $DEPLOY_ENV_YAML} "$@"
+
+status_code=$?
 
 ### --stop_docs
-# We don't always get a useful error code from the openstack deploy command,
-# so check `openstack stack list` for a CREATE_COMPLETE status.
-if ! openstack stack list | grep -q 'CREATE_COMPLETE'; then
-    {%if release not in ['kilo', 'mitaka', 'liberty'] %}
-    # get the failures list
-    openstack stack failures list overcloud --long > {{ failed_deployment_list }} || true
-    {% endif %}
 
-    # get any puppet related errors
-    for failed in $(openstack stack resource list \
-        --nested-depth 5 overcloud | grep FAILED |
-        grep 'StructuredDeployment ' | cut -d '|' -f3)
-    do
-    echo "heat deployment-show out put for deployment: $failed" >> {{ failed_deployments_log }}
-    echo "######################################################" >> {{ failed_deployments_log }}
-    heat deployment-show $failed >> {{ failed_deployments_log }}
-    echo "######################################################" >> {{ failed_deployments_log }}
-    echo "puppet standard error for deployment: $failed" >> {{ failed_deployments_log }}
-    echo "######################################################" >> {{ failed_deployments_log }}
-    # the sed part removes color codes from the text
-    heat deployment-show $failed |
-        jq -r .output_values.deploy_stderr |
-        sed -r "s:\x1B\[[0-9;]*[mK]::g" >> {{ failed_deployments_log }}
-    echo "######################################################" >> {{ failed_deployments_log }}
-    # We need to exit with 1 because of the above || true
-    done
-    exit 1
-fi
 exit $status_code

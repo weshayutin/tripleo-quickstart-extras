@@ -14,11 +14,11 @@
   tags:
     - run-tempest
 
-- include: stackviz.yml
-  when: run_tempest|bool
-  tags:
-    - run-stackviz
-  ignore_errors: yes
+# - include: stackviz.yml
+#   when: run_tempest|bool
+#   tags:
+#     - run-stackviz
+#   ignore_errors: yes
 
 - include: post-tempest.yml
   when: post_tempest|bool

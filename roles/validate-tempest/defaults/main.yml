@@ -6,7 +6,7 @@ public_net_pool_start: "{{ floating_ip_cidr|nthhost(100) }}"
 public_net_pool_end: "{{ floating_ip_cidr|nthhost(120) }}"
 public_net_gateway: "{{ floating_ip_cidr|nthhost(1) }}"
 tempest_log_file: 'tempest_output.log'
-test_regex: smoke
+test_regex: tempest.scenario
 
 public_net_name: public
 public_network_type: flat
@@ -31,6 +31,6 @@ tempest_failing: false
 tempest_exit_on_failure: true
 # Set tempest_version for different release
 # For forked-tempest, we have branched name in synced with releases.
-tempest_version_dict: { 'mitaka': 'mitaka', 'newton': 'newton',
+tempest_version_dict: { 'kilo':'kilo', 'liberty':'liberty', 'mitaka': 'mitaka', 'newton': 'newton',
                          'ocata': '15.0.0', 'master': 'master'}
 tempest_version: "{{ tempest_version_dict[release] }}"

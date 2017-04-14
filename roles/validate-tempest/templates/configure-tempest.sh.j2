@@ -22,20 +22,20 @@ rm -rf {{ working_dir }}/python-tempestconf
 ## * Clean up network if it exists from previous run
 ## ::
 
-for i in $(neutron floatingip-list -c id -f value)
+for i in $(neutron floatingip-list -c id -f csv --quote none)
 do
     neutron floatingip-disassociate $i
     neutron floatingip-delete $i
 done
-for i in $(neutron router-list -c id -f value); do neutron router-gateway-clear $i; done
-for r in $(neutron router-list -c id -f value); do
-    for p in $(neutron router-port-list $r -c id -f value); do
+for i in $(neutron router-list -c id -f csv --quote none | grep -v id); do neutron router-gateway-clear $i; done
+for r in $(neutron router-list -c id -f csv --quote none | grep -v id); do
+    for p in $(neutron router-port-list $r -c id -f csv --quote none | grep -v id); do
         neutron router-interface-delete $r port=$p || true
     done
 done
-for i in $(neutron router-list -c id -f value); do neutron router-delete $i; done
-for i in $(neutron port-list -c id -f value); do neutron port-delete $i; done
-for i in $(neutron net-list -c id -f value); do neutron net-delete $i; done
+for i in $(neutron router-list -c id -f csv --quote none | grep -v id); do neutron router-delete $i; done
+for i in $(neutron port-list -c id -f csv --quote none | grep -v id); do neutron port-delete $i; done
+for i in $(neutron net-list -c id -f csv --quote none | grep -v id); do neutron net-delete $i; done
 
 neutron net-create {{ public_net_name }} --router:external=True \
     --provider:network_type {{ public_network_type }} \
@@ -44,7 +44,7 @@ neutron net-create {{ public_net_name }} --router:external=True \
 {% endif %}
     --provider:physical_network {{ public_physical_network }}
 
-public_net_id=$(neutron net-show {{ public_net_name }} -f value -c id)
+public_net_id=$(neutron net-show {{ public_net_name }} -F id -f value)
 
 neutron subnet-create --name ext-subnet \
     --allocation-pool \
@@ -54,7 +54,7 @@ neutron subnet-create --name ext-subnet \
     {{ public_net_name }} {{ floating_ip_cidr }}
 {% else %}
 source {{ working_dir }}/stackrc
-public_net_id=$(neutron net-show {{ undercloud_public_net_name }} -f value -c id)
+public_net_id=$(neutron net-show {{ undercloud_public_net_name }} -F id -f value)
 {% endif %}
 
 ## * Ensure heat_stack_owner role is present
@@ -86,7 +86,7 @@ virtualenv --system-site-packages {{ working_dir }}/tempest_git/.venv
 {{ working_dir }}/tempest_git/tools/with_venv.sh pip install {{ working_dir }}/tempest_git junitxml
 # Create Tempest Workspace
 cd {{ working_dir }}/tempest
-{% if release in ['mitaka','newton'] %}
+{% if release in ['kilo', 'liberty', 'mitaka', 'newton'] %}
 {{ working_dir }}/tempest_git/tools/configure-tempest-directory
 {% else %}
 {{ working_dir }}/tempest_git/tools/with_venv.sh tempest init {{ working_dir }}/tempest
@@ -95,7 +95,7 @@ cd {{ working_dir }}/tempest
 {% elif tempest_format == "packages" %}
 # Install Tempest Package
 sudo yum -y install openstack-tempest python-junitxml
-{% if release in ['mitaka','newton'] %}
+{% if release in ['kilo', 'liberty', 'mitaka', 'newton'] %}
 cd {{ working_dir }}/tempest
 /usr/share/openstack-tempest-*/tools/configure-tempest-directory
 {% else %}
@@ -106,15 +106,15 @@ tempest init {{ working_dir }}/tempest
 {% endif %}
 
 # Install OpenStack Services Tempest plugin
-{% if release != "mitaka" %}
+#{% if release not in ['kilo', 'liberty', 'mitaka'] %}
 # FIXME(chkumar246): Install tempest plugin from package currently then switch to install_test_packages script
-sudo yum -y install python-ceilometer-tests python-zaqar-tests python-ironic-inspector-tests python-gnocchi-tests \
-    python-aodh-tests python-nova-tests python-mistral-tests python-heat-tests python-keystone-tests \
-    python-ironic-tests python-glance-tests python-swift-tests python-neutron-tests python-cinder-tests \
-{% endif %}
+#sudo yum -y install python-ceilometer-tests python-zaqar-tests python-ironic-inspector-tests python-gnocchi-tests \
+#    python-aodh-tests python-nova-tests python-mistral-tests python-heat-tests python-keystone-tests \
+#    python-ironic-tests python-glance-tests python-swift-tests python-neutron-tests python-cinder-tests \
+#{% endif %}
 
 # Generate tempest configuration files
-{% if release in ['mitaka','newton'] %}
+{% if release in ['kilo', 'liberty', 'mitaka','newton'] %}
 export TEMPESTCONF="{{ working_dir }}/tempest/tools/config_tempest.py"
 {% else %}
 {% if tempest_format == "venv" %}
